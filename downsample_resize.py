@@ -17,7 +17,6 @@ train_img_folder_path = 'INSERT YOUR PATH HERE'
 new_train_img_folder_path = 'downsampled_train_resized'
 random.seed(10)
 
-os.makedirs(os.path.join(new_train_img_folder_path,'unknown'))
 
 def resize_img(img_name,diagnosis):
 	image_loc = os.path.join(train_img_folder_path,img_name+'.jpg')
