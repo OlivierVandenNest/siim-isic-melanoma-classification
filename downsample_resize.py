@@ -15,23 +15,37 @@ from PIL import Image
 train_path = './train.csv'
 train_img_folder_path = 'INSERT YOUR PATH HERE'
 new_train_img_folder_path = 'downsampled_train_resized'
+random.seed(10)
 
-def resize_img(row):
-	image_loc = os.path.join(train_img_folder_path,row[0]+'.jpg')
+os.makedirs(os.path.join(new_train_img_folder_path,'unknown'))
+
+def resize_img(img_name,diagnosis):
+	image_loc = os.path.join(train_img_folder_path,img_name+'.jpg')
 	image = Image.open(image_loc)
 	new_img = image.resize((224,224))
-	new_img.save(os.path.join(new_train_img_folder_path,row[0]+'.jpg'))
+	dest = os.path.join(new_train_img_folder_path,diagnosis)
+	if not os.path.exists(dest):
+		os.makedirs(dest)
+	new_img.save(os.path.join(dest,img_name+'.jpg'))
 			  
 
 with open(train_path) as csvfile:
 	reader = csv.reader(csvfile)
 	nb_unknowns = 0
-	for row in reader:
-		if row[5] == 'unknown':
-			nb_unknowns += 1
-			nb_unknowns %= 10
-			if not nb_unknowns:
-				resize_img(row)
-		elif not row[5] == 'diagnosis':
-			resize_img(row)			
+	with open('downsampled_train_resized.csv', 'w', newline='') as file:
+	    writer = csv.writer(file)
+		for row in reader:
+			diagnosis = row[5]
+			if diagnosis == 'unknown':
+				nb_unknowns += 1
+				nb_unknowns %= 10
+				if not nb_unknowns:
+					resize_img(row[0],diagnosis)
+					writer.writerow(row)
+			elif not diagnosis == 'diagnosis':
+				resize_img(row[0],diagnosis)
+				writer.writerow(row)
+			else:
+				writer.write(row)
+		file.close()
 	csvfile.close()
